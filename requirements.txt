@@ -1,0 +1,5 @@
+pytelegrambotapi
+beautifulsoup4
+mp3-tagger
+requests
+urllib3
