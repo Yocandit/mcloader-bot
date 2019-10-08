@@ -74,13 +74,16 @@ def replacer():
     
 def sender(chat_id):
     for file in os.listdir('./music'):
-       mp3 = MP3File('./music/'+file)
-       mp3.set_version(VERSION_1)
-       song = mp3.song
-       artist = mp3.artist
-       audio=open('./music/'+ file, 'rb')
-       bot.send_audio(chat_id , audio , performer=artist , title = song , timeout = 1)
-       audio.close()
+       if file[-4:] == '.mp3':
+          mp3 = MP3File('./music/'+file)
+          mp3.set_version(VERSION_1)
+          song = mp3.song
+          artist = mp3.artist
+          audio=open('./music/'+ file, 'rb')
+          bot.send_audio(chat_id , audio , performer=artist , title = song , timeout = 1)
+          audio.close()
+       else:
+          pass
 
 #--------------------------------------------------------------  
 
