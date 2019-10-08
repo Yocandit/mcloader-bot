@@ -137,6 +137,10 @@ def main(message):
     except requests.exceptions.InvalidSchema:
        pass
 
+@bot.message_handler(content_types = ['text'])
+def mes(message):
+    bot.send_message(message.chat.id , message.text)
+    
 #--------------------------------------------------------------
 
 if connected():
