@@ -1,7 +1,7 @@
 from telebot import TeleBot
 from bs4 import BeautifulSoup
 from mp3_tagger import MP3File, VERSION_1, VERSION_2, VERSION_BOTH
-import requests, urllib, os, time
+import requests, urllib, os
 
 #--------------------------------------------------------------
 
@@ -96,7 +96,6 @@ def remover():
             
 @bot.message_handler(commands=['load'])
 def main(message):
-    start = time.time()
     url = message.text[6:]
     try :
        response = requests.get(url , stream=True)
@@ -113,49 +112,37 @@ def main(message):
           r = requests.get(BASE_URL + download_links[i],stream=True)
           if r.status_code == 200:
               with open('song{}.mp3'.format(str(i+1)) , 'wb') as f:
-                  print('downloading started...')
-                  f.write(r.content)
-                  print('downloading ended...')
+                  f.write(r.content)    
               renamer(i)
               replacer()
               sender(message.chat.id)
               remover()
     
           else :
-              print('error')
               pass
               
        links.clear()
        download_links.clear()
        
     except TypeError:
-       print('error')
        pass
     except urllib.error.HTTPError:
-       print('error')
        pass
     except AttributeError:
-       print('error')
        pass
     except requests.exceptions.ConnectionError:
-       print('error')
        pass
     except requests.exceptions.MissingSchema:
-       print('error')
        pass
     except requests.exceptions.InvalidSchema:
-       print('error')
        pass
-    
-    end = time.time()
-
-    runtime = print(end-start)
 
 #--------------------------------------------------------------
 
-print( 'connected' if connected() else 'no internet!' )
 if connected():
     bot.polling()
+else:
+    pass
 
 #--------------------------------------------------------------
 
