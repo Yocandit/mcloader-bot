@@ -5,10 +5,9 @@ import requests, urllib, os, time
 
 #--------------------------------------------------------------
 
-#token = os.environ.get('BOT_TOKEN_2')
+token = os.environ.get('BOT_TOKEN_2')
 
-TOKEN = '908066763:AAFvrd1m3cmmCvnPni5xrl1h_L3EJmWs99Q'
-bot = TeleBot(TOKEN)
+bot = TeleBot(token)
 x = 'html.parser'
 BASE_URL = 'http://myzuka.club'
 links = []
