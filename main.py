@@ -14,14 +14,14 @@ links = []
 download_links = []
 
 #--------------------------------------------------------------
-
+'''
 def connected(host='http://google.com'):
     try:
         urllib.request.urlopen(host)
         return True
     except:
         return False
-
+'''
 #--------------------------------------------------------------
 
 def parse(html):
@@ -138,12 +138,14 @@ def main(message):
        pass
 
 #--------------------------------------------------------------
-
+'''
 if connected():
     bot.polling()
 else:
     pass
+'''
 
+bot.polling()
 #--------------------------------------------------------------
 
 
