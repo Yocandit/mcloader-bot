@@ -17,7 +17,7 @@ bot_token = os.environ.get('BOT_TOKEN')
 bot = Bot(token=bot_token)
 dp = Dispatcher(bot)
 
-X = 'html.parser'
+x = 'html.parser'
 BASE_URL = 'http://myzuka.club'
 links = []
 download_links = []
@@ -34,7 +34,7 @@ def connected(host = 'http://google.com'):
 #--------------------------------------------------------------
 
 def parse(html):
-    soup = BeautifulSoup(html , X)
+    soup = BeautifulSoup(html , x)
     all_ = soup.find('div', {'class':'all'})
     main = all_.find('div', {'class':'main'})
     content = main.find('div', {'class':'content'})
@@ -49,7 +49,7 @@ def parse(html):
 #--------------------------------------------------------------
 
 def parse_2(html):
-    soup = BeautifulSoup(html, X)
+    soup = BeautifulSoup(html, x)
     all_ = soup.find('div', {'class':'all'})
     main = all_.find('div', {'class':'main'})
     content = main.find('div', {'class':'content'})
@@ -91,7 +91,7 @@ async def dloader(dlinks, chat_id):
     try:
        for i in dlinks:
            global download_links
-           r = requests.get(BASE_URL + download_links[i-1],stream = True)
+           r = requests.get(BASE_URL + download_links[i-1], stream = True)
            if r.status_code == 200:
                  with open('song{}.mp3'.format(str(i)), 'wb') as f:
                      f.write(r.content)
@@ -140,19 +140,19 @@ def renamer(i):
 def replacer():
     for files in os.listdir('./'):
         if files[-4:] == '.mp3':
-            os.rename('./'+files, './music/'+files)
+            os.rename('./' + files, './music/' + files)
 
 #--------------------------------------------------------------
     
 async def sender(chat_id):
     for file in os.listdir('./music'):
        if file[-4:] == '.mp3':
-          mp3 = MP3File('./music/'+file)
+          mp3 = MP3File('./music/' + file)
           mp3.set_version(VERSION_1)
           song = mp3.song
           artist = mp3.artist
-          audio = open('./music/'+ file, 'rb')
-          await bot.send_audio(chat_id, audio, performer=artist, title = song)
+          audio = open('./music/' + file, 'rb')
+          await bot.send_audio(chat_id, audio, performer = artist, title = song)
           audio.close()
        else:
           pass
@@ -162,7 +162,7 @@ async def sender(chat_id):
 def remover():
     for files in os.listdir('./music'):
         if files[-4:] == '.mp3':
-            os.remove('./music/'+files)
+            os.remove('./music/' + files)
 
 #--------------------------------------------------------------
 
@@ -206,14 +206,14 @@ async def main(message: types.Message):
 
     edit_links, url = edited_links(nums, msg_text)
     try :
-       response = requests.get(url, stream=True)
-       parse(response.content)
+       response = requests.get(url, stream = True)
+       parse(response.content) 
        
        global links, BASE_URL, download_links
 
        for i in range(len(links)):
           main_url = BASE_URL + str(links[i])
-          r = requests.get(main_url, stream=True)
+          r = requests.get(main_url, stream = True)
           parse_2(r.content)
 
        if edit_links == None:
