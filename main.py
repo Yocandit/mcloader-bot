@@ -14,7 +14,7 @@ logging.basicConfig(level = logging.DEBUG, format = '%(asctime)s : %(levelname)s
 
 bot_token = os.environ.get('BOT_TOKEN')
 
-bot = Bot(token=bot_token)
+bot = Bot(token = bot_token)
 dp = Dispatcher(bot)
 
 x = 'html.parser'
@@ -34,7 +34,7 @@ def connected(host = 'http://google.com'):
 #--------------------------------------------------------------
 
 def parse(html):
-    soup = BeautifulSoup(html , x)
+    soup = BeautifulSoup(html, x)
     all_ = soup.find('div', {'class':'all'})
     main = all_.find('div', {'class':'main'})
     content = main.find('div', {'class':'content'})
@@ -63,23 +63,23 @@ def parse_2(html):
 #--------------------------------------------------------------
 
 def edited_links(nums, message):
-    if nums != None :
+    if nums != None:
         url = message[6:-(len(nums)+2)]
         check = nums
         if '-' in check and ',' not in check:
             nums = numbers(nums)
             edit_links = [i for i in range(int(nums[0]),int(nums[-1])+1)]
-        elif ',' in check and '-' not in check :
+        elif ',' in check and '-' not in check:
             edit_links = numbers(nums)
         else:
             edit_links = nums.split(',')
             for i in edit_links:
-                if len(i) >= 3 :
+                if len(i) >= 3:
                     nums = i
                     break
             nums = numbers(nums)
             edit_links = [i for i in range(int(nums[0]),int(nums[-1])+1)] 
-    else :
+    else:
         url = message[6:]
         edit_links = None
         
@@ -99,7 +99,7 @@ async def dloader(dlinks, chat_id):
                  replacer()
                  await sender(chat_id)
                  remover()
-           else :
+           else:
                  pass
     except IndexError:
         pass
@@ -118,7 +118,7 @@ async def dloader_2(chat_id):
                 replacer()
                 await sender(chat_id)
                 remover()
-            else :
+            else:
                 pass
     except IndexError:
         pass
@@ -205,7 +205,7 @@ async def main(message: types.Message):
     edit_links = []
 
     edit_links, url = edited_links(nums, msg_text)
-    try :
+    try:
        response = requests.get(url, stream = True)
        parse(response.content) 
        
