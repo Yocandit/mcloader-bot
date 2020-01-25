@@ -199,7 +199,7 @@ def numbers(nums):
 @dp.message_handler(commands = ['load'])
 async def main(message: types.Message):
     await message.reply('please wait')
-    chat_id = message.from_user.id
+    chat_id = message.chat.id
     msg_text = message.text
     nums = regexp(msg_text)
     edit_links = []
