@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+#--------------------------------------------------------------
+
 from aiogram import Bot, Dispatcher, executor, types
 from bs4 import BeautifulSoup
 from mp3_tagger import MP3File, VERSION_1, VERSION_2, VERSION_BOTH
@@ -12,10 +14,10 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s : %(levelname)s : %
 
 token = os.environ.get('BOT_TOKEN')
 
-bot = Bot(token=bot_token)
+bot = Bot(token=token)
 dp = Dispatcher(bot)
 
-x = 'html.parser'
+X = 'html.parser'
 BASE_URL = 'http://myzuka.club'
 links = []
 download_links = []
@@ -32,7 +34,7 @@ def connected(host='http://google.com'):
 #--------------------------------------------------------------
 
 def parse(html):
-    soup = BeautifulSoup(html , x)
+    soup = BeautifulSoup(html , X)
     all_ = soup.find('div' , {'class':'all'})
     main = all_.find('div' , {'class':'main'})
     content = main.find('div' , {'class':'content'})
@@ -117,7 +119,6 @@ async def dloader_2(chat_id):
                 await sender(chat_id)
                 remover()
             else :
-                print('dloader error')
                 pass
     except IndexError:
         pass
@@ -132,7 +133,6 @@ def renamer(i):
        title = song['song']
        os.rename('song{}.mp3'.format(i) , '{}. {}.mp3'.format(str(i),title))
     except OSError:
-       print('OSError')
        pass
     
 #--------------------------------------------------------------
@@ -170,7 +170,6 @@ def regexp(m):
     try:
         return m.split('(',1)[1].split(')')[0]
     except IndexError:
-        print('IndexError')
         return None
         pass
 
@@ -227,19 +226,14 @@ async def main(message: types.Message):
        download_links.clear()
 
     except urllib.error.HTTPError:
-       print('urllib.error.HTTPError')
        pass
     except AttributeError:
-       print('AttributeError')
        pass
     except requests.exceptions.ConnectionError:
-       print('ConnectionError')
        pass
     except requests.exceptions.MissingSchema:
-       print('MissingSchema')
        pass
     except requests.exceptions.InvalidSchema:
-       print('InvalidSchema')
        pass
 
 #--------------------------------------------------------------
