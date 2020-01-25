@@ -10,11 +10,11 @@ import requests, urllib, os, re, logging
 
 #--------------------------------------------------------------
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s : %(levelname)s : %(message)s')
+logging.basicConfig(level = logging.DEBUG, format = '%(asctime)s : %(levelname)s : %(message)s')
 
-token = os.environ.get('BOT_TOKEN')
+bot_token = os.environ.get('BOT_TOKEN')
 
-bot = Bot(token=token)
+bot = Bot(token=bot_token)
 dp = Dispatcher(bot)
 
 X = 'html.parser'
@@ -24,7 +24,7 @@ download_links = []
 
 #--------------------------------------------------------------
 '''
-def connected(host='http://google.com'):
+def connected(host = 'http://google.com'):
     try:
         urllib.request.urlopen(host)
         return True
@@ -35,34 +35,34 @@ def connected(host='http://google.com'):
 
 def parse(html):
     soup = BeautifulSoup(html , X)
-    all_ = soup.find('div' , {'class':'all'})
-    main = all_.find('div' , {'class':'main'})
-    content = main.find('div' , {'class':'content'})
-    inner = content.find('div' , {'class':'inner'})
-    top = inner.find_all('div' , {'class':'top'})
+    all_ = soup.find('div', {'class':'all'})
+    main = all_.find('div', {'class':'main'})
+    content = main.find('div', {'class':'content'})
+    inner = content.find('div', {'class':'inner'})
+    top = inner.find_all('div', {'class':'top'})
     title = inner.find('h1')
 
     global links
-    for top in inner.find_all('div' , class_ = 'player-inline'):
+    for top in inner.find_all('div', class_ = 'player-inline'):
         links.append(top.a['href'])
 
 #--------------------------------------------------------------
 
 def parse_2(html):
-    soup = BeautifulSoup(html , x)
-    all_ = soup.find('div' , {'class':'all'})
-    main = all_.find('div' , {'class':'main'})
-    content = main.find('div' , {'class':'content'})
-    inner = content.find('div' , {'class':'inner'})
-    options = inner.find('div' , {'class':'options'})
-    top = options.find('div' , {'class':'top'})
+    soup = BeautifulSoup(html, X)
+    all_ = soup.find('div', {'class':'all'})
+    main = all_.find('div', {'class':'main'})
+    content = main.find('div', {'class':'content'})
+    inner = content.find('div', {'class':'inner'})
+    options = inner.find('div', {'class':'options'})
+    top = options.find('div', {'class':'top'})
     
     global download_links
     download_links.append(top.a['href'])
     
 #--------------------------------------------------------------
 
-def edited_links(nums , message):
+def edited_links(nums, message):
     if nums != None :
         url = message[6:-(len(nums)+2)]
         check = nums
@@ -74,7 +74,7 @@ def edited_links(nums , message):
         else:
             edit_links = nums.split(',')
             for i in edit_links:
-                if len(i) >=3 :
+                if len(i) >= 3 :
                     nums = i
                     break
             nums = numbers(nums)
@@ -83,17 +83,17 @@ def edited_links(nums , message):
         url = message[6:]
         edit_links = None
         
-    return edit_links , url
+    return edit_links, url
 
 #--------------------------------------------------------------       
 
-async def dloader(dlinks , chat_id):
+async def dloader(dlinks, chat_id):
     try:
        for i in dlinks:
            global download_links
-           r = requests.get(BASE_URL + download_links[i-1],stream=True)
+           r = requests.get(BASE_URL + download_links[i-1],stream = True)
            if r.status_code == 200:
-                 with open('song{}.mp3'.format(str(i)) , 'wb') as f:
+                 with open('song{}.mp3'.format(str(i)), 'wb') as f:
                      f.write(r.content)
                  renamer(i)
                  replacer()
@@ -110,9 +110,9 @@ async def dloader_2(chat_id):
     global download_links
     try:
        for i in range(len(download_links)):
-            r = requests.get(BASE_URL + download_links[i],stream=True)
+            r = requests.get(BASE_URL + download_links[i], stream = True)
             if r.status_code == 200:
-                with open('song{}.mp3'.format(str(i)) , 'wb') as f:
+                with open('song{}.mp3'.format(str(i)), 'wb') as f:
                    f.write(r.content)
                 renamer(i)
                 replacer()
@@ -131,7 +131,7 @@ def renamer(i):
        mp3.set_version(VERSION_1)
        song = mp3.get_tags()
        title = song['song']
-       os.rename('song{}.mp3'.format(i) , '{}. {}.mp3'.format(str(i),title))
+       os.rename('song{}.mp3'.format(i), '{}. {}.mp3'.format(str(i), title))
     except OSError:
        pass
     
@@ -151,7 +151,7 @@ async def sender(chat_id):
           mp3.set_version(VERSION_1)
           song = mp3.song
           artist = mp3.artist
-          audio=open('./music/'+ file, 'rb')
+          audio = open('./music/'+ file, 'rb')
           await bot.send_audio(chat_id, audio, performer=artist, title = song)
           audio.close()
        else:
@@ -197,30 +197,29 @@ def numbers(nums):
 
 #--------------------------------------------------------------
             
-@dp.message_handler(commands=['load'])
+@dp.message_handler(commands = ['load'])
 async def main(message: types.Message):
-    await message.reply('please wait...')
     chat_id = message.from_user.id
     msg_text = message.text
     nums = regexp(msg_text)
     edit_links = []
 
-    edit_links , url = edited_links(nums , msg_text)
+    edit_links, url = edited_links(nums, msg_text)
     try :
-       response = requests.get(url , stream=True)
+       response = requests.get(url, stream=True)
        parse(response.content)
        
-       global links , BASE_URL , download_links
+       global links, BASE_URL, download_links
 
        for i in range(len(links)):
           main_url = BASE_URL + str(links[i])
-          r = requests.get(main_url , stream=True)
+          r = requests.get(main_url, stream=True)
           parse_2(r.content)
 
        if edit_links == None:
            await dloader_2(chat_id)
        else:
-           await dloader(edit_links , chat_id)
+           await dloader(edit_links, chat_id)
               
        links.clear()
        download_links.clear()
