@@ -1,13 +1,20 @@
-from telebot import TeleBot
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+from aiogram import Bot, Dispatcher, executor, types
 from bs4 import BeautifulSoup
 from mp3_tagger import MP3File, VERSION_1, VERSION_2, VERSION_BOTH
-import requests, urllib, os
+import requests, urllib, os, re, logging
 
 #--------------------------------------------------------------
 
-token = os.environ.get('BOT_TOKEN_2')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s : %(levelname)s : %(message)s')
 
-bot = TeleBot(token)
+token = os.environ.get('BOT_TOKEN')
+
+bot = Bot(token=bot_token)
+dp = Dispatcher(bot)
+
 x = 'html.parser'
 BASE_URL = 'http://myzuka.club'
 links = []
@@ -53,14 +60,79 @@ def parse_2(html):
     
 #--------------------------------------------------------------
 
+def edited_links(nums , message):
+    if nums != None :
+        url = message[6:-(len(nums)+2)]
+        check = nums
+        if '-' in check and ',' not in check:
+            nums = numbers(nums)
+            edit_links = [i for i in range(int(nums[0]),int(nums[-1])+1)]
+        elif ',' in check and '-' not in check :
+            edit_links = numbers(nums)
+        else:
+            edit_links = nums.split(',')
+            for i in edit_links:
+                if len(i) >=3 :
+                    nums = i
+                    break
+            nums = numbers(nums)
+            edit_links = [i for i in range(int(nums[0]),int(nums[-1])+1)] 
+    else :
+        url = message[6:]
+        edit_links = None
+        
+    return edit_links , url
+
+#--------------------------------------------------------------       
+
+async def dloader(dlinks , chat_id):
+    try:
+       for i in dlinks:
+           global download_links
+           r = requests.get(BASE_URL + download_links[i-1],stream=True)
+           if r.status_code == 200:
+                 with open('song{}.mp3'.format(str(i)) , 'wb') as f:
+                     f.write(r.content)
+                 renamer(i)
+                 replacer()
+                 await sender(chat_id)
+                 remover()
+           else :
+                 pass
+    except IndexError:
+        pass
+
+#--------------------------------------------------------------
+
+async def dloader_2(chat_id):
+    global download_links
+    try:
+       for i in range(len(download_links)):
+            r = requests.get(BASE_URL + download_links[i],stream=True)
+            if r.status_code == 200:
+                with open('song{}.mp3'.format(str(i)) , 'wb') as f:
+                   f.write(r.content)
+                renamer(i)
+                replacer()
+                await sender(chat_id)
+                remover()
+            else :
+                print('dloader error')
+                pass
+    except IndexError:
+        pass
+    
+#--------------------------------------------------------------            
+
 def renamer(i):
     try:
-       mp3 = MP3File('song{}.mp3'.format(i+1))
+       mp3 = MP3File('song{}.mp3'.format(i))
        mp3.set_version(VERSION_1)
        song = mp3.get_tags()
        title = song['song']
-       os.rename('song{}.mp3'.format(i+1) , '{}. {}.mp3'.format(str(i+1),title))
+       os.rename('song{}.mp3'.format(i) , '{}. {}.mp3'.format(str(i),title))
     except OSError:
+       print('OSError')
        pass
     
 #--------------------------------------------------------------
@@ -72,7 +144,7 @@ def replacer():
 
 #--------------------------------------------------------------
     
-def sender(chat_id):
+async def sender(chat_id):
     for file in os.listdir('./music'):
        if file[-4:] == '.mp3':
           mp3 = MP3File('./music/'+file)
@@ -80,7 +152,7 @@ def sender(chat_id):
           song = mp3.song
           artist = mp3.artist
           audio=open('./music/'+ file, 'rb')
-          bot.send_audio(chat_id , audio , performer=artist , title = song , timeout = 1)
+          await bot.send_audio(chat_id, audio, performer=artist, title = song)
           audio.close()
        else:
           pass
@@ -93,10 +165,48 @@ def remover():
             os.remove('./music/'+files)
 
 #--------------------------------------------------------------
+
+def regexp(m):
+    try:
+        return m.split('(',1)[1].split(')')[0]
+    except IndexError:
+        print('IndexError')
+        return None
+        pass
+
+#--------------------------------------------------------------
+
+def numbers(nums):
+    l = len(nums)
+    integ = []
+    i = 0
+    while i < l:
+       num_int = ''
+       a = nums[i]
+       while '0' <= a <= '9':
+          num_int += a
+          i += 1
+          if i < l:
+             a = nums[i]
+          else:
+             break
+       i += 1
+       if num_int != '':
+          integ.append(int(num_int))
+ 
+    return sorted(integ)
+
+#--------------------------------------------------------------
             
-@bot.message_handler(commands=['load'])
-def main(message):
-    url = message.text[6:]
+@dp.message_handler(commands=['load'])
+async def main(message: types.Message):
+    await message.reply('please wait...')
+    chat_id = message.from_user.id
+    msg_text = message.text
+    nums = regexp(msg_text)
+    edit_links = []
+
+    edit_links , url = edited_links(nums , msg_text)
     try :
        response = requests.get(url , stream=True)
        parse(response.content)
@@ -104,50 +214,40 @@ def main(message):
        global links , BASE_URL , download_links
 
        for i in range(len(links)):
-          main_url = BASE_URL + links[i]
+          main_url = BASE_URL + str(links[i])
           r = requests.get(main_url , stream=True)
           parse_2(r.content)
 
-       for i in range(len(download_links)):
-          r = requests.get(BASE_URL + download_links[i],stream=True)
-          if r.status_code == 200:
-              with open('song{}.mp3'.format(str(i+1)) , 'wb') as f:
-                  f.write(r.content)    
-              renamer(i)
-              replacer()
-              sender(message.chat.id)
-              remover()
-    
-          else :
-              pass
+       if edit_links == None:
+           await dloader_2(chat_id)
+       else:
+           await dloader(edit_links , chat_id)
               
        links.clear()
        download_links.clear()
-       
-    except TypeError:
-       pass
+
     except urllib.error.HTTPError:
+       print('urllib.error.HTTPError')
        pass
     except AttributeError:
+       print('AttributeError')
        pass
     except requests.exceptions.ConnectionError:
+       print('ConnectionError')
        pass
     except requests.exceptions.MissingSchema:
+       print('MissingSchema')
        pass
     except requests.exceptions.InvalidSchema:
+       print('InvalidSchema')
        pass
 
 #--------------------------------------------------------------
-'''
-if connected():
-    bot.polling()
-else:
-    pass
-'''
 
-bot.polling()
+if __name__ == '__main__':
+    executor.start_polling(dp, skip_updates = True)
+    
 #--------------------------------------------------------------
-
 
 
 
