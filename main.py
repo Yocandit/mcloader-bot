@@ -11,7 +11,6 @@ import requests, urllib, os, re, logging
 #--------------------------------------------------------------
 
 logging.basicConfig(level = logging.DEBUG, format = '%(asctime)s : %(levelname)s : %(message)s')
-
 bot_token = os.environ.get('BOT_TOKEN')
 
 bot = Bot(token = bot_token)
