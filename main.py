@@ -1,14 +1,8 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
-
-#--------------------------------------------------------------
-
 from aiogram import Bot, Dispatcher, executor, types
 from bs4 import BeautifulSoup
 from mp3_tagger import MP3File, VERSION_1, VERSION_2, VERSION_BOTH
 import requests, urllib, os, re, logging
 
-#--------------------------------------------------------------
 
 logging.basicConfig(level = logging.DEBUG, format = '%(asctime)s : %(levelname)s : %(message)s')
 bot_token = os.environ.get('BOT_TOKEN')
@@ -21,16 +15,6 @@ BASE_URL = 'http://myzuka.club'
 links = []
 download_links = []
 
-#--------------------------------------------------------------
-'''
-def connected(host = 'http://google.com'):
-    try:
-        urllib.request.urlopen(host)
-        return True
-    except:
-        return False
-'''
-#--------------------------------------------------------------
 
 def parse(html):
     soup = BeautifulSoup(html, x)
@@ -45,7 +29,6 @@ def parse(html):
     for top in inner.find_all('div', class_ = 'player-inline'):
         links.append(top.a['href'])
 
-#--------------------------------------------------------------
 
 def parse_2(html):
     soup = BeautifulSoup(html, x)
@@ -58,8 +41,7 @@ def parse_2(html):
     
     global download_links
     download_links.append(top.a['href'])
-    
-#--------------------------------------------------------------
+
 
 def edited_links(nums, message):
     if nums != None:
@@ -83,13 +65,12 @@ def edited_links(nums, message):
         edit_links = None
         
     return edit_links, url
-
-#--------------------------------------------------------------       
+   
 
 async def dloader(dlinks, chat_id):
+    global download_links
     try:
-       for i in dlinks:
-           global download_links
+       for i in dlinks:  
            r = requests.get(BASE_URL + download_links[i-1], stream = True)
            if r.status_code == 200:
                  with open('song{}.mp3'.format(str(i)), 'wb') as f:
@@ -103,7 +84,6 @@ async def dloader(dlinks, chat_id):
     except IndexError:
         pass
 
-#--------------------------------------------------------------
 
 async def dloader_2(chat_id):
     global download_links
@@ -122,8 +102,7 @@ async def dloader_2(chat_id):
     except IndexError:
         pass
     
-#--------------------------------------------------------------            
-
+    
 def renamer(i):
     try:
        mp3 = MP3File('song{}.mp3'.format(i))
@@ -133,15 +112,13 @@ def renamer(i):
        os.rename('song{}.mp3'.format(i), '{}. {}.mp3'.format(str(i), title))
     except OSError:
        pass
-    
-#--------------------------------------------------------------
+
 
 def replacer():
     for files in os.listdir('./'):
         if files[-4:] == '.mp3':
             os.rename('./' + files, './music/' + files)
 
-#--------------------------------------------------------------
     
 async def sender(chat_id):
     for file in os.listdir('./music'):
@@ -156,14 +133,12 @@ async def sender(chat_id):
        else:
           pass
 
-#--------------------------------------------------------------  
 
 def remover():
     for files in os.listdir('./music'):
         if files[-4:] == '.mp3':
             os.remove('./music/' + files)
 
-#--------------------------------------------------------------
 
 def regexp(m):
     try:
@@ -172,7 +147,6 @@ def regexp(m):
         return None
         pass
 
-#--------------------------------------------------------------
 
 def numbers(nums):
     l = len(nums)
@@ -194,7 +168,6 @@ def numbers(nums):
  
     return sorted(integ)
 
-#--------------------------------------------------------------
             
 @dp.message_handler(commands = ['load'])
 async def main(message: types.Message):
@@ -235,9 +208,11 @@ async def main(message: types.Message):
     except requests.exceptions.InvalidSchema:
        pass
 
-#--------------------------------------------------------------
-
 executor.start_polling(dp, skip_updates = True)
+
+
+if __name__ == '__main__':
+    executor.start_polling(dp, skip_updates = True)
 
 
 
