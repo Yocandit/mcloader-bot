@@ -208,8 +208,6 @@ async def main(message: types.Message):
     except requests.exceptions.InvalidSchema:
        pass
 
-executor.start_polling(dp, skip_updates = True)
-
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates = True)
 
